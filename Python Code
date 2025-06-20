@@ -1,0 +1,77 @@
+import collections
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+    def __repr__(self):
+
+        return f"Node({self.val})"
+
+class Codec:
+    
+    def serialize(self, root: TreeNode) -> str:
+
+      result = []
+        
+        def dfs(node):
+
+            if not node:
+                result.append("#")
+                return
+
+            result.append(str(node.val))
+            dfs(node.left)
+            dfs(node.right)
+
+        dfs(root)
+        return ",".join(result)
+
+    def deserialize(self, data: str) -> TreeNode:
+        
+        if not data:
+            return None
+            
+        values = data.split(',')
+
+        self.vals_iter = iter(values)
+        
+        def build():
+            val = next(self.vals_iter)
+            
+            if val == "#":
+                return None
+            node = TreeNode(int(val))
+            node.left = build()
+            node.right = build()
+            return node
+            
+        return build()
+
+def are_trees_equal(root1, root2):
+    if not root1 and not root2:
+        return True
+    if not root1 or not root2 or root1.val != root2.val:
+        return False
+    return are_trees_equal(root1.left, root2.left) and are_trees_equal(root1.right, root2.right)
+if __name__ == "__main__":
+    original_root = TreeNode(1)
+    original_root.left = TreeNode(2)
+    original_root.right = TreeNode(3)
+    original_root.right.left = TreeNode(4)
+    original_root.right.right = TreeNode(5)
+
+    print("--- Testing Serialize and Deserialize Binary Tree ---")
+    codec = Codec()
+    serialized_data = codec.serialize(original_root)
+    print(f"Original Tree serialized to: {serialized_data}")
+
+    deserialized_root = codec.deserialize(serialized_data)
+
+    re_serialized_data = codec.serialize(deserialized_root)
+    print(f"Deserialized Tree re-serialized to: {re_serialized_data}")
+    
+    print("\nVerification:")
+    print(f"Serialized strings are identical: {serialized_data == re_serialized_data}")
+    print(f"Tree structures are identical (verified by traversal): {are_trees_equal(original_root, deserialized_root)}")
